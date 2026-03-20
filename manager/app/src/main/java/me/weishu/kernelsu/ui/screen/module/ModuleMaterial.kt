@@ -106,10 +106,12 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -147,6 +149,7 @@ fun ModulePagerMaterial(
     bottomInnerPadding: Dp,
 ) {
     val snackBarHost = LocalSnackbarHost.current
+    val haptic = LocalHapticFeedback.current
 
     val context = LocalContext.current
     val resource = LocalResources.current
@@ -267,17 +270,29 @@ fun ModulePagerMaterial(
             .pullToRefresh(
                 state = pullToRefreshState,
                 isRefreshing = uiState.isRefreshing,
-                onRefresh = { actions.onRefresh() },
+                onRefresh = {
+                    // 震动：下拉刷新模块列表
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    actions.onRefresh()
+                },
             ),
         topBar = {
             SearchAppBar(
                 title = { Text(stringResource(R.string.module)) },
                 searchText = uiState.searchStatus.searchText,
                 onSearchTextChange = actions.onSearchTextChange,
-                onClearClick = actions.onClearSearch,
+                onClearClick = {
+                    // 震动：点击顶栏搜索框清空按钮
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    actions.onClearSearch()
+                },
                 navigationIcon = {
                     IconButton(
-                        onClick = actions.onOpenRepo
+                        onClick = {
+                            // 震动：点击顶栏模块仓库入口按钮
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                            actions.onOpenRepo()
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Cloud,
@@ -290,7 +305,11 @@ fun ModulePagerMaterial(
 
                     var showDropdown by remember { mutableStateOf(false) }
                     IconButton(
-                        onClick = { showDropdown = true }
+                        onClick = {
+                            // 震动：打开模块列表排序/筛选下拉菜单
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                            showDropdown = true
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
@@ -304,6 +323,8 @@ fun ModulePagerMaterial(
                                 text = { Text(stringResource(R.string.module_sort_action_first)) },
                                 trailingIcon = { Checkbox(uiState.sortActionFirst, null) },
                                 onClick = {
+                                    // 震动：选择「Action 优先 (module_sort_action_first)」排序
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                                     actions.onToggleSortActionFirst()
                                 }
                             )
@@ -311,6 +332,8 @@ fun ModulePagerMaterial(
                                 text = { Text(stringResource(R.string.module_sort_enabled_first)) },
                                 trailingIcon = { Checkbox(uiState.sortEnabledFirst, null) },
                                 onClick = {
+                                    // 震动：选择「已启用优先 (module_sort_enabled_first)」排序
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                                     actions.onToggleSortEnabledFirst()
                                 }
                             )
@@ -369,6 +392,8 @@ fun ModulePagerMaterial(
                     modifier = Modifier.padding(bottom = bottomInnerPadding),
                     expanded = fabExpanded,
                     onClick = {
+                        // 震动：点击模块列表项（跳转模块详情）
+                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                         // Select the zip files to install
                         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                             type = "application/zip"
@@ -527,6 +552,8 @@ private fun ModuleShortcutSheet(
 ) {
     if (!show) return
 
+    val haptic = LocalHapticFeedback.current
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -574,7 +601,11 @@ private fun ModuleShortcutSheet(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onPickShortcutIcon) {
+                TextButton(onClick = {
+                    // 震动：点击选择桌面快捷方式图标
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    onPickShortcutIcon()
+                }) {
                     Text(stringResource(id = R.string.module_shortcut_icon_pick))
                 }
                 AnimatedVisibility(
@@ -583,7 +614,11 @@ private fun ModuleShortcutSheet(
                     exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it }),
                 ) {
                     IconButton(
-                        onClick = shortcutState::resetIconToDefault,
+                        onClick = {
+                            // 震动：重置快捷方式图标为默认
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                            shortcutState.resetIconToDefault()
+                        },
                         modifier = Modifier.padding(start = 12.dp)
                     ) {
                         Icon(
@@ -602,7 +637,11 @@ private fun ModuleShortcutSheet(
             )
             if (shortcutState.hasExistingShortcut) {
                 TextButton(
-                    onClick = onDeleteShortcut,
+                    onClick = {
+                        // 震动：点击「删除桌面快捷方式」按钮
+                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                        onDeleteShortcut()
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -614,13 +653,21 @@ private fun ModuleShortcutSheet(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedButton(
-                    onClick = onDismiss,
+                    onClick = {
+                        // 震动：点击「取消」关闭快捷方式设置弹窗
+                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                        onDismiss()
+                    },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(stringResource(id = android.R.string.cancel))
                 }
                 Button(
-                    onClick = onConfirmShortcut,
+                    onClick = {
+                        // 震动：点击「确认」添加桌面快捷方式
+                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                        onConfirmShortcut()
+                    },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(
@@ -653,6 +700,7 @@ private fun ModuleItem(
     TonalCard(
         modifier = Modifier.fillMaxWidth()
     ) {
+        val haptic = LocalHapticFeedback.current
         val textDecoration = if (!module.remove) null else TextDecoration.LineThrough
         val interactionSource = remember { MutableInteractionSource() }
         val indication = LocalIndication.current
@@ -669,7 +717,11 @@ private fun ModuleItem(
                             interactionSource = interactionSource,
                             role = Role.Button,
                             indication = indication,
-                            onValueChange = { onClick() }
+                            onValueChange = {
+                             // 震动：点击模块卡片（模块有 WebUI 时此区域触发启用切换）
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                onClick()
+                            }
                         )
                     } else {
                         this
@@ -719,7 +771,11 @@ private fun ModuleItem(
                     ExpressiveSwitch(
                         enabled = !module.update,
                         checked = module.enabled,
-                        onCheckedChange = onCheckChanged,
+                        onCheckedChange = {
+                            // 震动：切换模块启用/禁用开关
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                            onCheckChanged(it)
+                        },
                         interactionSource = if (!module.hasWebUi) interactionSource else remember { MutableInteractionSource() }
                     )
                 }
@@ -863,7 +919,11 @@ private fun ModuleItem(
                         Button(
                             modifier = Modifier.defaultMinSize(52.dp, 32.dp),
                             enabled = !module.remove,
-                            onClick = onUpdate,
+                            onClick = {
+                                // 震动：点击「更新模块 (module_update)」按钮
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                onUpdate()
+                            },
                             shape = ButtonDefaults.textShape,
                             contentPadding = ButtonDefaults.TextButtonContentPadding
                         ) {
@@ -888,7 +948,11 @@ private fun ModuleItem(
 
                 FilledTonalButton(
                     modifier = Modifier.defaultMinSize(52.dp, 32.dp),
-                    onClick = onUninstallClicked,
+                    onClick = {
+                        // 震动：点击「卸载/撤销卸载模块」按钮
+                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                        onUninstallClicked()
+                    },
                     contentPadding = ButtonDefaults.TextButtonContentPadding
                 ) {
                     if (!module.remove) {
@@ -934,6 +998,7 @@ fun CombinedClickableButton(
     content: @Composable RowScope.() -> Unit,
 ) {
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+    val haptic = LocalHapticFeedback.current
 
     Surface(
         modifier = modifier
@@ -943,8 +1008,16 @@ fun CombinedClickableButton(
                 interactionSource = interactionSource,
                 indication = LocalIndication.current,
                 enabled = enabled,
-                onClick = onClick,
-                onLongClick = onLongClick
+                onClick = {
+                    // 震动：点击模块列表项（普通点击）
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    onClick()
+                },
+                onLongClick = {
+                    // 震动：长按模块列表项
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onLongClick()
+                }
             ),
         shape = shape,
         color = if (enabled) colors.containerColor else colors.disabledContainerColor,

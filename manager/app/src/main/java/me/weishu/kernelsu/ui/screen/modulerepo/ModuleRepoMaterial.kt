@@ -77,8 +77,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.UriHandler
@@ -112,6 +114,8 @@ fun ModuleRepoScreenMaterial(
 ) {
     val listState = rememberLazyListState()
     val searchListState = rememberLazyListState()
+
+    val haptic = LocalHapticFeedback.current
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
@@ -243,12 +247,17 @@ private fun RepoModuleList(
         items(modules, key = { it.moduleId }, contentType = { "module" }) { module ->
             val latestReleaseTime = remember(module.latestReleaseTime) { module.latestReleaseTime }
             val moduleAuthor = stringResource(id = R.string.module_author)
+            val haptic = LocalHapticFeedback.current
 
             TonalCard(modifier = Modifier.fillMaxWidth()) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onModuleClick(module) }
+                        .clickable {
+                            // 震动：点击模块卡片，进入模块详情
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                            onModuleClick(module)
+                        }
                         .padding(22.dp, 18.dp, 22.dp, 12.dp)
                 ) {
                     if (module.moduleName.isNotEmpty()) {
@@ -345,6 +354,7 @@ fun ModuleRepoDetailScreenMaterial(
     val confirmDialog = rememberConfirmDialog(onConfirm = { pendingDownload?.invoke() })
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
@@ -509,6 +519,7 @@ fun ReleasesPage(
     setPendingDownload: ((() -> Unit)) -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
+    val haptic = LocalHapticFeedback.current
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -684,6 +695,7 @@ fun InfoPage(
     sourceUrl: String,
 ) {
     val layoutDirection = LocalLayoutDirection.current
+    val haptic = LocalHapticFeedback.current
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()

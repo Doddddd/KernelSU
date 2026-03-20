@@ -43,7 +43,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -71,6 +73,7 @@ fun SettingPagerMaterial(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackBarHost = LocalSnackbarHost.current
+    val haptic = LocalHapticFeedback.current
     val showUninstallDialog = rememberSaveable { mutableStateOf(false) }
     var showBottomsheet by remember { mutableStateOf(false) }
 
@@ -105,7 +108,11 @@ fun SettingPagerMaterial(
                                 title = stringResource(id = R.string.settings_check_update),
                                 summary = stringResource(id = R.string.settings_check_update_summary),
                                 checked = uiState.checkUpdate,
-                                onCheckedChange = actions.onSetCheckUpdate
+                                onCheckedChange = {
+                                    // 震动：切换「检查更新 (Check for updates)」开关
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                    actions.onSetCheckUpdate(it)
+                                }
                             )
                         },
                         {
@@ -114,7 +121,11 @@ fun SettingPagerMaterial(
                                 title = stringResource(id = R.string.settings_module_check_update),
                                 summary = stringResource(id = R.string.settings_check_update_summary),
                                 checked = uiState.checkModuleUpdate,
-                                onCheckedChange = actions.onSetCheckModuleUpdate
+                                onCheckedChange = {
+                                    // 震动：切换「检查模块更新 (Check for module updates)」开关
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                    actions.onSetCheckModuleUpdate(it)
+                                }
                             )
                         }
                     )
@@ -131,12 +142,20 @@ fun SettingPagerMaterial(
                             summary = stringResource(id = R.string.settings_ui_mode_summary),
                             items = UiMode.entries.map { it.name },
                             selectedIndex = if (uiState.uiMode == UiMode.Material.value) 1 else 0,
-                            onItemSelected = actions.onSetUiModeIndex
+                            onItemSelected = {
+                                // 震动：切换「UI 风格 (UI Style)」
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                actions.onSetUiModeIndex(it)
+                            }
                         )
                     }
                     add {
                         SegmentedListItem(
-                            onClick = actions.onOpenTheme,
+                            onClick = {
+                                // 震动：点击「主题 (Theme)」设置入口
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                actions.onOpenTheme()
+                            },
                             headlineContent = { Text(stringResource(id = R.string.settings_theme)) },
                             supportingContent = { Text(stringResource(id = R.string.settings_theme_summary)) },
                             leadingContent = { Icon(Icons.Filled.Palette, stringResource(id = R.string.settings_theme)) },
@@ -157,7 +176,11 @@ fun SettingPagerMaterial(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     content = listOf {
                         SegmentedListItem(
-                            onClick = actions.onOpenProfileTemplate,
+                            onClick = {
+                                // 震动：点击「App Profile 模板」入口
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                actions.onOpenProfileTemplate()
+                            },
                             headlineContent = { Text(profileTemplate) },
                             supportingContent = { Text(stringResource(id = R.string.settings_profile_template_summary)) },
                             leadingContent = { Icon(Icons.Filled.Fence, profileTemplate) },
@@ -195,7 +218,11 @@ fun SettingPagerMaterial(
                                 items = suCompatModeItems,
                                 enabled = uiState.suCompatStatus == "supported",
                                 selectedIndex = uiState.suCompatMode,
-                                onItemSelected = actions.onSetSuCompatMode
+                                onItemSelected = {
+                                    // 震动：设置经典 su 命令模式（Classic SU command）
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                    actions.onSetSuCompatMode(it)
+                                }
                             )
                         },
                         {
@@ -210,7 +237,11 @@ fun SettingPagerMaterial(
                                 summary = umountSummary,
                                 enabled = uiState.kernelUmountStatus == "supported",
                                 checked = uiState.isKernelUmountEnabled,
-                                onCheckedChange = actions.onSetKernelUmountEnabled
+                                onCheckedChange = {
+                                    // 震动：切换「内核级卸载模块 (Umount modules kernel-level)」开关
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                    actions.onSetKernelUmountEnabled(it)
+                                }
                             )
                         },
                         {
@@ -219,7 +250,11 @@ fun SettingPagerMaterial(
                                 title = stringResource(id = R.string.settings_umount_modules_default),
                                 summary = stringResource(id = R.string.settings_umount_modules_default_summary),
                                 checked = uiState.isDefaultUmountModules,
-                                onCheckedChange = actions.onSetDefaultUmountModules
+                                onCheckedChange = {
+                                    // 震动：切换「默认卸载模块 (Umount modules by default)」开关
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                    actions.onSetDefaultUmountModules(it)
+                                }
                             )
                         },
                         {
@@ -228,7 +263,11 @@ fun SettingPagerMaterial(
                                 title = stringResource(id = R.string.enable_web_debugging),
                                 summary = stringResource(id = R.string.enable_web_debugging_summary),
                                 checked = uiState.enableWebDebugging,
-                                onCheckedChange = actions.onSetEnableWebDebugging
+                                onCheckedChange = {
+                                    // 震动：切换「启用 WebView 调试 (Enable WebView Debugging)」开关
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                    actions.onSetEnableWebDebugging(it)
+                                }
                             )
                         },
                         {
@@ -238,7 +277,11 @@ fun SettingPagerMaterial(
                                 summary = stringResource(id = R.string.settings_auto_jailbreak_summary),
                                 enabled = uiState.isLateLoadMode,
                                 checked = uiState.autoJailbreak,
-                                onCheckedChange = actions.onSetAutoJailbreak
+                                onCheckedChange = {
+                                    // 震动：切换「自动越狱 (Auto jailbreak)」开关
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                    actions.onSetAutoJailbreak(it)
+                                }
                             )
                         }
                     )
@@ -252,7 +295,11 @@ fun SettingPagerMaterial(
                         {
                             val uninstall = stringResource(id = R.string.settings_uninstall)
                             SegmentedListItem(
-                                onClick = { showUninstallDialog.value = true },
+                                onClick = {
+                                    // 震动：点击「卸载 KernelSU (Uninstall)」入口
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                    showUninstallDialog.value = true
+                                },
                                 enabled = !uiState.isLateLoadMode,
                                 headlineContent = { Text(uninstall) },
                                 leadingContent = { Icon(Icons.Filled.Delete, uninstall) }
@@ -267,7 +314,11 @@ fun SettingPagerMaterial(
                 content = listOf(
                     {
                         SegmentedListItem(
-                            onClick = { showBottomsheet = true },
+                            onClick = {
+                                // 震动：点击「发送日志 (Send Log)」按钮
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                showBottomsheet = true
+                            },
                             headlineContent = { Text(stringResource(id = R.string.send_log)) },
                             leadingContent = {
                                 Icon(
@@ -279,7 +330,11 @@ fun SettingPagerMaterial(
                     },
                     {
                         SegmentedListItem(
-                            onClick = actions.onOpenAbout,
+                            onClick = {
+                                // 震动：点击「关于 (About)」入口
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                actions.onOpenAbout()
+                            },
                             headlineContent = { Text(stringResource(id = R.string.about)) },
                             leadingContent = {
                                 Icon(

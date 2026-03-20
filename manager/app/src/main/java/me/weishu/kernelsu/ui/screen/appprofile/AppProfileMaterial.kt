@@ -51,6 +51,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -154,6 +156,7 @@ private fun AppProfileInner(
     onManageTemplate: () -> Unit = {},
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
+    val haptic = LocalHapticFeedback.current
     val isRootGranted = profile.allowSu
     val userId = appUid / 100000
     val appId = appUid % 100000
@@ -226,7 +229,11 @@ private fun AppProfileInner(
                         icon = Icons.Filled.Security,
                         title = stringResource(id = R.string.superuser),
                         checked = isRootGranted,
-                        onCheckedChange = { onProfileChange(profile.copy(allowSu = it)) },
+                        onCheckedChange = {
+                            // 震动：切换「超级用户 (Superuser)」开关
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                            onProfileChange(profile.copy(allowSu = it))
+                        },
                     )
                 },
                 {
@@ -336,6 +343,7 @@ private fun TopBar(
     onForceStopApp: (String, Int) -> Unit,
     onRestartApp: (String, Int) -> Unit,
 ) {
+    val haptic = LocalHapticFeedback.current
     LargeFlexibleTopAppBar(
         title = { Text(stringResource(R.string.profile)) },
         navigationIcon = {
@@ -399,6 +407,7 @@ private fun ProfileBox(
     hasTemplate: Boolean,
     onModeChange: (Mode) -> Unit,
 ) {
+    val haptic = LocalHapticFeedback.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -415,6 +424,8 @@ private fun ProfileBox(
             ToggleButton(
                 checked = mode == m,
                 onCheckedChange = {
+                    // 震动：切换 Profile 模式（默认 Default / 模板 Template / 自定义 Custom）
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                     if (m != Mode.Template || hasTemplate) onModeChange(m)
                 },
                 enabled = if (m == Mode.Template) hasTemplate else true,

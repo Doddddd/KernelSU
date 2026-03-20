@@ -78,9 +78,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -109,6 +111,7 @@ fun ColorPaletteScreenMaterial(
     val currentKeyColor = uiState.keyColor
     val colorStyle = state.currentPaletteStyle
     val colorSpec = state.currentColorSpec
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
@@ -166,6 +169,8 @@ fun ColorPaletteScreenMaterial(
                         paletteStyle = colorStyle,
                         colorSpec = colorSpec,
                         onClick = {
+                            // 震动：切换取色结果
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                             actions.onSetKeyColor(0)
                         }
                     )
@@ -179,6 +184,8 @@ fun ColorPaletteScreenMaterial(
                         paletteStyle = colorStyle,
                         colorSpec = colorSpec,
                         onClick = {
+                            // 震动：切换取色结果
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                             actions.onSetKeyColor(color)
                         }
                     )
@@ -208,6 +215,8 @@ fun ColorPaletteScreenMaterial(
                                 checked = currentColorMode in modes,
                                 onCheckedChange = {
                                     if (it) {
+                                        // 震动：切换日间夜间主题
+                                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                                         actions.onSetColorMode(modes.first())
                                     }
                                 },
@@ -246,6 +255,8 @@ fun ColorPaletteScreenMaterial(
                                 items = styles.map { it.name },
                                 selectedIndex = styles.indexOf(colorStyle),
                                 onItemSelected = { index ->
+                                    // 震动：切换色彩风格
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                                     actions.onSetColorStyle(styles[index].name)
                                 }
                             )
@@ -258,6 +269,8 @@ fun ColorPaletteScreenMaterial(
                                 items = specs.map { it.name },
                                 selectedIndex = specs.indexOf(colorSpec).coerceAtLeast(0),
                                 onItemSelected = { index ->
+                                    // 震动：切换色彩标准
+                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                                     actions.onSetColorSpec(specs[index].name)
                                 }
                             )
@@ -275,7 +288,11 @@ fun ColorPaletteScreenMaterial(
                                     title = stringResource(id = R.string.settings_enable_predictive_back),
                                     summary = stringResource(id = R.string.settings_enable_predictive_back_summary),
                                     checked = uiState.enablePredictiveBack,
-                                    onCheckedChange = actions.onSetEnablePredictiveBack
+                                    onCheckedChange = {
+                                        // 震动：预测性返回手势开关
+                                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                        actions.onSetEnablePredictiveBack(it)
+                                    }
                                 )
                             }
                         )
@@ -323,7 +340,11 @@ fun ColorPaletteScreenMaterial(
                         Slider(
                             value = sliderValue,
                             onValueChange = { sliderValue = it },
-                            onValueChangeFinished = { actions.onSetPageScale(sliderValue) },
+                            onValueChangeFinished = {
+                                // 震动：拖动界面缩放进度条
+                                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                actions.onSetPageScale(sliderValue)
+                            },
                             valueRange = 0.8f..1.1f,
                             modifier = Modifier.fillMaxWidth()
                         )
